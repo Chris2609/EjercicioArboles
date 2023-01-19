@@ -6,4 +6,5 @@
  *
  */
 module EjercicioArboles {
+	requires java.sql;
 }
