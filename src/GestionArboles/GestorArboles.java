@@ -2,6 +2,7 @@ package GestionArboles;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -28,7 +29,7 @@ public class GestorArboles {
         Connection conexion;
         Class.forName("com.mysql.cj.jdbc.Driver");
 		conexion = DriverManager.getConnection("jdbc:mysql://"+HOST+"/"+BBDD, USERNAME, PASSWORD);
-		Statement st = conexion.createStatement();
+//		Statement st = conexion.createStatement();
         
 		Arbol arbol = new Arbol();
 		
@@ -63,18 +64,31 @@ public class GestorArboles {
                 System.out.println("Introduce el origen del árbol");
                 origen = scan.nextLine();
                 
-                st.execute("INSERT INTO tablaarbol (nombre_comun, nombre_cientifico, habitat, altura, origen) VALUES ('"+nombrecomun+"',"+" '"+nombrecientifico+"',"+" '"+habitat+"',"+" "+altura+","+ " '"+origen+"')");
+//                st.execute("INSERT INTO tablaarbol (nombre_comun, nombre_cientifico, habitat, altura, origen) VALUES ('"+nombrecomun+"',"+" '"+nombrecientifico+"',"+" '"+habitat+"',"+" "+altura+","+ " '"+origen+"')");
 
+                PreparedStatement preparedSt = conexion.prepareStatement("INSERT INTO tablaarbol (nombre_comun, nombre_cientifico, habitat, altura, origen) VALUES (?,?,?,?,?)");
+                preparedSt.setString(1, nombrecomun);
+                preparedSt.setString(2, nombrecientifico);
+                preparedSt.setString(3, habitat);        
+                preparedSt.setInt(4, altura);
+                preparedSt.setString(5, origen);
+                
+                preparedSt.execute();
+                
                 System.out.println("Árbol introducido correctamente");
                 
                 break;
             case OPCION_DOS:
-                System.out.println("Introduce el nombre científico del arbol que quieres eliminar");
+                System.out.println("Introduce el nombre común del arbol que quieres eliminar");
                 String borrar = scan.nextLine();
                 
-                String sentenciaDelete = "DELETE FROM tablaarbol WHERE nombre_comun = '"+borrar+"'";
-        		st.execute(sentenciaDelete);
-                
+//                String sentenciaDelete = "DELETE FROM tablaarbol WHERE nombre_comun = ?";
+//        		st.execute(sentenciaDelete);
+                preparedSt = conexion.prepareStatement("DELETE FROM tablaarbol WHERE nombre_comun = ?");
+                preparedSt.setString(1, borrar);
+                preparedSt.execute();
+        		
+        		
                 break;
             case OPCION_TRES:
                 System.out.println("Introduce el nombe científico del arbol que quieres actualizar");
@@ -91,22 +105,40 @@ public class GestorArboles {
                 System.out.println("Introduce el nuevo origen del árbol");
                 origen = scan.nextLine();
                 
-                String sentenciaUpdate = "UPDATE tablaarbol SET nombre_comun='"+nombrecomun+"', nombre_cientifico= '"+nombrecientifico+"', habitat='"+habitat+"', altura='"+altura+"', origen='"+origen+"' WHERE nombre_cientifico = '"+actualizar+"'";
-        		st.executeUpdate(sentenciaUpdate);
-        		
+//                String sentenciaUpdate = "UPDATE tablaarbol SET nombre_comun='"+nombrecomun+"', nombre_cientifico= '"+nombrecientifico+"', habitat='"+habitat+"', altura='"+altura+"', origen='"+origen+"' WHERE nombre_cientifico = '"+actualizar+"'";
+//        		st.executeUpdate(sentenciaUpdate);
+                
+                preparedSt = conexion.prepareStatement("UPDATE tablaarbol SET nombre_comun= ?, nombre_cientifico= ?, habitat= ?, altura= ?, origen= ? WHERE nombre_cientifico = ?");
+                
+                preparedSt.setString(1, nombrecomun);
+                preparedSt.setString(2, nombrecientifico);
+                preparedSt.setString(3, habitat);        
+                preparedSt.setInt(4, altura);
+                preparedSt.setString(5, origen);
+                preparedSt.setString(6, actualizar);
+                
+                preparedSt.execute();
+                
                 break;
                
             case OPCION_CUATRO:
                 System.out.println("Cargando árboles...\n");
                 
-        		String sentenciaSelect = "SELECT * FROM tablaarbol";
-        		ResultSet resultado = st.executeQuery(sentenciaSelect);
-        		while(resultado.next()) {
-        			System.out.println(resultado.getInt(1) + "|" + resultado.getString(2) + "|" + resultado.getString(3) + "|" + resultado.getString(4) + "|" + resultado.getInt(5)+ "|" + resultado.getString(6));
-        		}
-        		System.out.println("\n");
-        		
-        		
+//        		String sentenciaSelect = "SELECT * FROM tablaarbol";
+//        		ResultSet resultado = st.executeQuery(sentenciaSelect);
+//        		while(resultado.next()) {
+//        			System.out.println(resultado.getInt(1) + "|" + resultado.getString(2) + "|" + resultado.getString(3) + "|" + resultado.getString(4) + "|" + resultado.getInt(5)+ "|" + resultado.getString(6));
+//        		}
+//        		System.out.println("\n");
+//        		
+                preparedSt = conexion.prepareStatement("SELECT * FROM tablaarbol");
+				preparedSt.execute();
+				ResultSet resultado = preparedSt.executeQuery();
+				System.out.println("ID|NombreC|NombreC|Habitat|Altura|Origen");
+				while(resultado.next()) {
+					System.out.println(resultado.getInt(1) + "|" + resultado.getString(2) + "|" + resultado.getString(3) + "|" + resultado.getString(4) + "|" + resultado.getInt(5) + "|" + resultado.getString(6) + "\n");
+				}                 
+                
                 break;
                 
             case SALIR:
